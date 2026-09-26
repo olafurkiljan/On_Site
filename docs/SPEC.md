@@ -16,7 +16,7 @@ Input: the pasted text of EFKT's daily email "Morgendagens oppdrag" (Norwegian).
 - SKIP: Selger, Megler, Meglerkontor contact details (names, phones, emails). Keep only what's needed on site.
 
 ## Screens
-1. Today: date + "N JOBS · N KEY PICKUP"; sun strip (golden hour, sunset, blue hour); job cards in time order (done = struck through, next = highlighted); key pickups as smaller dashed cards with a tick box; "Paste tomorrow" button top right. A day switcher (today / tomorrow).
+1. Today: date + "N JOBS · N KEY PICKUP"; sun strip (golden hour, sunset, blue hour); job cards in time order (done = struck through, next = highlighted); key pickups as smaller dashed cards with a tick box; "Paste tomorrow" button top right. Shows today only (no day switcher); if today is empty, says when the next saved jobs are.
 2. Paste tomorrow: "Paste" uses navigator.clipboard.readText(), with a textarea fallback. "Found N jobs" review list with CHECK flags; tap to edit; "Paste again"; "Save N jobs".
 3. On site (per job): address, time, property type, editing style.
    - If "Instruksjoner til fotograf" has text: highlighted note at the top. If empty: nothing.

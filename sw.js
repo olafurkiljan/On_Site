@@ -1,6 +1,6 @@
 /* On Site — service worker: keeps the app working offline.
    Bump CACHE on every release so phones pick up the new files. */
-var CACHE = 'onsite-v3';
+var CACHE = 'onsite-v4';
 var FONT_CACHE = 'onsite-fonts';
 var FILES = [
   './',

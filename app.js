@@ -3,7 +3,7 @@
   'use strict';
 
   var STORE_KEY = 'onsite.v1';
-  var APP_VERSION = '1.0.2';
+  var APP_VERSION = '1.0.3';
   var DEFAULT_DETAILS = ['Fireplace', 'Kitchen tap', 'Window view', 'Door handle', 'Light fixture', 'Textiles', 'Bathroom tiles'];
   var PRODUCTS = ['Standard foto', 'Dronefoto', 'Kveldsfoto'];
   var PROPERTY_TYPES = ['Leilighet', 'Enebolig', 'Rekkehus', 'Tomannsbolig', 'Hytte', 'Tomt'];
@@ -51,11 +51,6 @@
     catch (e) { var d = new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
   }
   function pad(n) { return (n < 10 ? '0' : '') + n; }
-  function addDays(iso, n) {
-    var p = iso.split('-');
-    var d = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2] + n));
-    return d.getUTCFullYear() + '-' + pad(d.getUTCMonth() + 1) + '-' + pad(d.getUTCDate());
-  }
   function dayLabel(iso, opts) {
     if (!iso) return 'No date';
     var p = iso.split('-');
@@ -118,7 +113,7 @@
 
   /* ---------- UI state ---------- */
   var ui = {
-    screen: 'today', day: isoToday(), jobRef: null,
+    screen: 'today', jobRef: null,
     paste: { text: '', jobs: null, open: -1, showBox: false },
     editing: false, addingChip: false, addingRoom: false, openNotes: {}
   };
@@ -142,37 +137,19 @@
   }
 
   function renderToday() {
-    var today = isoToday(), tomorrow = addDays(today, 1);
-    var jobs = jobsList().filter(function (j) { return j.date === ui.day; }).sort(byTime);
+    var today = isoToday();
+    var jobs = jobsList().filter(function (j) { return j.date === today; }).sort(byTime);
     var pickups = jobs.filter(function (j) { return j.hasKeys; }).length;
+    var now = nowMinutes();
+    var next = jobs.filter(function (j) { return !j.finishedAt && mins(j.end || j.start) >= now; })[0];
 
-    // Day switcher: today, tomorrow, plus other dates that still have open jobs
-    var days = [today, tomorrow];
-    jobsList().forEach(function (j) {
-      if (j.date && !j.finishedAt && days.indexOf(j.date) === -1) days.push(j.date);
-    });
-    if (days.indexOf(ui.day) === -1) days.push(ui.day);
-    days = days.slice(0, 2).concat(days.slice(2).sort()).slice(0, 5);
-
-    var next = null;
-    if (ui.day === today) {
-      var now = nowMinutes();
-      next = jobs.filter(function (j) { return !j.finishedAt && mins(j.end || j.start) >= now; })[0];
-    } else if (ui.day > today) {
-      next = jobs.filter(function (j) { return !j.finishedAt; })[0];
-    }
-
-    var sun = OnSiteSun.forDate(ui.day);
+    var sun = OnSiteSun.forDate(today);
     var h = '';
     h += '<div class="topbar"><button class="btn small" data-a="settings">Settings</button>' +
       '<button class="btn primary small" data-a="paste">Paste tomorrow</button></div>';
-    h += '<h1 style="margin-top:12px">' + esc(dayLabel(ui.day)) + '</h1>';
+    h += '<h1 style="margin-top:12px">' + esc(dayLabel(today)) + '</h1>';
     h += '<p class="label" style="margin-top:4px">' + plural(jobs.length, 'job', 'jobs').toUpperCase() + ' · ' +
       plural(pickups, 'key pickup', 'key pickups').toUpperCase() + '</p>';
-    h += '<div class="seg" role="group" aria-label="Day">' + days.map(function (d) {
-      var name = d === today ? 'Today' : d === tomorrow ? 'Tomorrow' : dayLabel(d, { weekday: 'short', day: 'numeric', month: 'short' });
-      return '<button data-a="day" data-v="' + d + '" aria-pressed="' + (d === ui.day) + '">' + esc(name) + '</button>';
-    }).join('') + '</div>';
     h += '<div class="sun">' +
       '<div class="golden"><span class="label">Golden hour</span><b>' + esc(sun.golden.start || '—') + '</b></div>' +
       '<div><span class="label">Sunset</span><b>' + esc(sun.sunset || '—') + '</b></div>' +
@@ -180,7 +157,11 @@
       '</div>';
 
     if (!jobs.length) {
-      h += '<div class="empty">No jobs this day.<br>Tap <b>Paste tomorrow</b> to import the EFKT email.</div>';
+      var upcoming = jobsList().filter(function (j) { return j.date > today && !j.finishedAt; }).sort(byTime);
+      h += '<div class="empty">No jobs today.<br>' + (upcoming.length
+        ? 'Next: ' + plural(upcoming.filter(function (j) { return j.date === upcoming[0].date; }).length, 'job', 'jobs') +
+          ' on ' + esc(dayLabel(upcoming[0].date)) + '. They show here that morning.'
+        : 'Tap <b>Paste tomorrow</b> to import the EFKT email.') + '</div>';
       return h;
     }
     jobs.forEach(function (j) {
@@ -487,9 +468,9 @@
     });
     save();
     var first = jobs.slice().sort(byTime)[0];
-    toast('Saved ' + plural(jobs.length, 'job', 'jobs'));
+    toast('Saved ' + plural(jobs.length, 'job', 'jobs') + (first && first.date && first.date !== isoToday() ? ' for ' + dayLabel(first.date) : ''));
     ui.paste = { text: '', jobs: null, open: -1, showBox: false };
-    go('today', { day: first && first.date ? first.date : ui.day });
+    go('today');
   }
 
   function exportBackup() {
@@ -532,7 +513,6 @@
       case 'home': go('today'); break;
       case 'settings': go('settings'); break;
       case 'paste': go('paste'); break;
-      case 'day': ui.day = v; render(); break;
       case 'open': go('job', { jobRef: el.getAttribute('data-ref') }); break;
       case 'pickup': {
         var pj = store.jobs[el.getAttribute('data-ref')];
@@ -593,7 +573,7 @@
       case 'copySummary': copyText(summaryText(j)); break;
       case 'finishNow':
         j.finishedAt = new Date().toISOString(); save();
-        toast('Job finished'); go('today', { day: j.date || ui.day }); break;
+        toast('Job finished'); go('today'); break;
       case 'reopen': j.finishedAt = null; save(); render(); break;
       case 'export': exportBackup(); break;
     }

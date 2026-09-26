@@ -3,7 +3,7 @@
   'use strict';
 
   var STORE_KEY = 'onsite.v1';
-  var APP_VERSION = '1.0.1';
+  var APP_VERSION = '1.0.2';
   var DEFAULT_DETAILS = ['Fireplace', 'Kitchen tap', 'Window view', 'Door handle', 'Light fixture', 'Textiles', 'Bathroom tiles'];
   var PRODUCTS = ['Standard foto', 'Dronefoto', 'Kveldsfoto'];
   var PROPERTY_TYPES = ['Leilighet', 'Enebolig', 'Rekkehus', 'Tomannsbolig', 'Hytte', 'Tomt'];

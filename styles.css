@@ -207,4 +207,21 @@ textarea { min-height: 140px; resize: vertical; }
   max-width: 528px; margin: 0 auto; background: var(--ink); color: #fff; padding: 12px 16px; text-align: center;
 }
 
+/* Counteract the blurred / shaded status bar edge on iOS 27 (Home Screen app, portrait):
+   a solid strip in the app background colour sits behind the clock and battery. */
+#status-bar-tint { display: none; }
+@media (display-mode: standalone) and (orientation: portrait) {
+  .is-ios #status-bar-tint {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: env(safe-area-inset-top, 0px);
+    z-index: 2000;
+    pointer-events: none;
+    background-color: var(--bg);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }

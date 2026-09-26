@@ -46,7 +46,16 @@
     check('No seller/agent names, phones or emails in output', leaked.length === 0, leaked.join(', '));
 
     var again = parser.parse(text + '\n' + text);
-    check('Same ref twice = no duplicates', again.jobs.length === 4);
+    check('Same ref twice = no duplicates', again.jobs.length === 4 &&
+      again.jobs.every(function (j) { return j.id === j.ref; }));
+
+    // One EFKT ref with two visits (day + evening) must give two jobs, not one.
+    var twoVisits = parser.parse(text.replace('EFKT #600004', 'EFKT #600003'));
+    var visits = twoVisits.jobs.filter(function (j) { return j.ref === '600003'; });
+    check('Same EFKT ref, two times = 2 jobs', twoVisits.jobs.length === 4 && visits.length === 2 &&
+      visits[0].id !== visits[1].id, visits.map(function (j) { return j.id + ' ' + j.start; }).join(', '));
+    var twoAgain = parser.parse(text.replace('EFKT #600004', 'EFKT #600003') + '\n' + text.replace('EFKT #600004', 'EFKT #600003'));
+    check('Same ref, two times, pasted twice = still 4 jobs', twoAgain.jobs.length === 4);
 
     return { results: results, parsed: r };
   }

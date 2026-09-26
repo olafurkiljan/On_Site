@@ -119,7 +119,10 @@
     var time = parseTime(buckets.time || []);
     var prod = parseProducts(buckets.products || []);
     var prop = parseProperty(buckets.property || []);
-    var addrLines = (buckets.address || []).filter(function (l) { return !isMissing(l); });
+    // EFKT sometimes puts "Etasje: 2" under Adresse; read it as property info, not as an address line.
+    var addrLines = (buckets.address || []).filter(function (l) { return !isMissing(l) && !/^[^:]+:\s*/.test(l); });
+    var addrProp = parseProperty((buckets.address || []).filter(function (l) { return /^[^:]+:\s*/.test(l); }));
+    Object.keys(addrProp).forEach(function (k) { if (!prop[k]) prop[k] = addrProp[k]; });
     var street = clean(addrLines[0] || headingAddr);
     var place = clean(addrLines[1] || '');
     var pm = place.match(/^(\d{4})\s+(.*)$/);
@@ -154,14 +157,11 @@
     var lines = String(text || '').replace(/\r\n?/g, '\n').split('\n').map(function (l) {
       return l.replace(/ /g, ' ').trim();
     });
-    var byRef = {};
-    var order = [];
+    var parsed = [];
     var cur = null;
     function flush() {
       if (!cur) return;
-      var job = parseBlock(cur.ref, cur.addr, cur.kind, cur.lines);
-      if (!byRef[job.ref]) order.push(job.ref);
-      byRef[job.ref] = job; // same ref twice in one paste: last one wins
+      parsed.push(parseBlock(cur.ref, cur.addr, cur.kind, cur.lines));
       cur = null;
     }
     lines.forEach(function (line) {
@@ -172,12 +172,26 @@
     });
     flush();
 
-    var jobs = order.map(function (r) { return byRef[r]; });
+    // Job id: the EFKT ref. When one ref has several visits (e.g. day shoot + evening
+    // shoot), each visit becomes its own job: ref + start time, e.g. "600003-2000".
+    var refTimes = {};
+    parsed.forEach(function (j) {
+      refTimes[j.ref] = refTimes[j.ref] || [];
+      if (refTimes[j.ref].indexOf(j.start) === -1) refTimes[j.ref].push(j.start);
+    });
+    var byId = {};
+    var order = [];
+    parsed.forEach(function (j) {
+      j.id = refTimes[j.ref].length > 1 ? j.ref + '-' + (j.start || '').replace(':', '') : j.ref;
+      if (!byId[j.id]) order.push(j.id);
+      byId[j.id] = j; // exact same visit listed twice: last one wins
+    });
+    var jobs = order.map(function (id) { return byId[id]; });
     jobs.sort(function (a, b) {
       return (a.date + a.start).localeCompare(b.date + b.start);
     });
     var keyPickups = jobs.filter(function (j) { return j.hasKeys; }).map(function (j) {
-      return { ref: j.ref, before: j.start, note: j.keyNote };
+      return { id: j.id, ref: j.ref, before: j.start, note: j.keyNote };
     });
     return { jobs: jobs, keyPickups: keyPickups };
   }

@@ -10,7 +10,7 @@ Input: the pasted text of EFKT's daily email "Morgendagens oppdrag" (Norwegian).
 - Products: "N standard foto" -> Standard foto target N. "N dronefoto" -> Dronefoto target N. "N kveldsfoto" -> Kveldsfoto target N. "Plantegning 2d" -> floor plan task. Ignore "Oppmøte". Unknown products: keep as plain text on the job.
 - Key instructions that say keys are picked up somewhere (e.g. "Nøkler hentes på meglerkontoret") -> create a KEY PICKUP step before that job, and a "return keys" item on the job.
 - "Missing" values count as empty.
-- Same address, different times = separate jobs.
+- Same address, different times = separate jobs. Same EFKT ref with two times (day + evening shoot) = two jobs too (id = ref + start time).
 - Same EFKT ref imported again -> update that job, don't duplicate.
 - Anything expected but missing -> red CHECK flag on the review screen. Every field editable.
 - SKIP: Selger, Megler, Meglerkontor contact details (names, phones, emails). Keep only what's needed on site.

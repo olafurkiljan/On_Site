@@ -3,7 +3,7 @@
   'use strict';
 
   var STORE_KEY = 'onsite.v1';
-  var APP_VERSION = '1.0.3';
+  var APP_VERSION = '1.0.4';
   var DEFAULT_DETAILS = ['Fireplace', 'Kitchen tap', 'Window view', 'Door handle', 'Light fixture', 'Textiles', 'Bathroom tiles'];
   var PRODUCTS = ['Standard foto', 'Dronefoto', 'Kveldsfoto'];
   var PROPERTY_TYPES = ['Leilighet', 'Enebolig', 'Rekkehus', 'Tomannsbolig', 'Hytte', 'Tomt'];
@@ -31,6 +31,7 @@
       s.jobs = s.jobs && typeof s.jobs === 'object' ? s.jobs : {};
       s.settings = s.settings || { weScan: false };
       s.customChips = Array.isArray(s.customChips) ? s.customChips : [];
+      Object.keys(s.jobs).forEach(function (k) { if (s.jobs[k] && !s.jobs[k].id) s.jobs[k].id = k; });
       return s;
     } catch (e) { return emptyStore(); }
   }
@@ -167,13 +168,13 @@
     jobs.forEach(function (j) {
       if (j.hasKeys) {
         h += '<div class="pickup' + (j.keysPickedUp ? ' done' : '') + '">' +
-          '<button class="tick" role="checkbox" aria-checked="' + !!j.keysPickedUp + '" aria-label="Keys picked up" data-a="pickup" data-ref="' + esc(j.ref) + '">' + (j.keysPickedUp ? '✓' : '') + '</button>' +
+          '<button class="tick" role="checkbox" aria-checked="' + !!j.keysPickedUp + '" aria-label="Keys picked up" data-a="pickup" data-ref="' + esc(j.id) + '">' + (j.keysPickedUp ? '✓' : '') + '</button>' +
           '<div class="what"><span class="label">Key pickup · before ' + esc(j.start || '') + '</span><br>' +
           esc(j.keyNote || 'Pick up keys') + ' <span class="muted">for ' + esc(j.street) + '</span></div></div>';
       }
       var tip = OnSiteSun.tipFor(j.date, j.start, j.end);
       var cls = 'card' + (j.finishedAt ? ' done' : '') + (next === j ? ' next' : '');
-      h += '<button class="' + cls + '" data-a="open" data-ref="' + esc(j.ref) + '">' +
+      h += '<button class="' + cls + '" data-a="open" data-ref="' + esc(j.id) + '">' +
         '<div class="spread"><span class="time">' + esc(timeRange(j)) + '</span><span class="row">' +
         (next === j ? '<span class="tag next">Next</span>' : '') +
         (j.finishedAt ? '<span class="tag">Done</span>' : '') +
@@ -206,7 +207,7 @@
       h += '<p class="muted" style="margin-top:4px;font-size:14px">Tap a job to check or edit it.</p>';
       p.jobs.forEach(function (j, i) {
         var flagged = (j.flags || []).length > 0;
-        var exists = !!store.jobs[j.ref];
+        var exists = !!findSaved(j, p.jobs);
         h += '<div class="review' + (flagged ? ' flagged' : '') + '" id="rv' + i + '">' +
           '<button data-a="toggleReview" data-i="' + i + '" aria-expanded="' + (p.open === i) + '">' +
           '<div class="spread"><span class="time">' + esc(j.date ? dayLabel(j.date, { weekday: 'short', day: 'numeric', month: 'short' }) + ' · ' : '') + esc(timeRange(j)) + '</span>' +
@@ -275,7 +276,7 @@
     if ((j.flags || []).length) h += '<p style="margin-top:8px">' + flagTag(j) + '</p>';
 
     if (ui.editing) {
-      h += '<div class="section">' + editForm(j, 's' + j.ref) + '</div>';
+      h += '<div class="section">' + editForm(j, 's' + j.id) + '</div>';
       h += '<button class="btn primary block" style="margin-top:16px" data-a="toggleEdit">Done editing</button>';
       return h;
     }
@@ -330,7 +331,7 @@
     var rooms = j.rooms || [];
     h += '<div class="section"><span class="label">Rooms · ' + rooms.filter(function (r) { return r.done; }).length + '/' + rooms.length + ' done</span>';
     rooms.forEach(function (r, i) {
-      var open = ui.openNotes[j.ref + ':' + i];
+      var open = ui.openNotes[j.id + ':' + i];
       h += '<div class="room' + (r.done ? ' done' : '') + '"><div class="row">' +
         '<button class="tick" role="checkbox" aria-checked="' + r.done + '" aria-label="' + esc(r.name) + ' done" data-a="room" data-i="' + i + '">' + (r.done ? '✓' : '') + '</button>' +
         '<span class="name" data-a="room" data-i="' + i + '">' + esc(r.name) + '</span>' +
@@ -409,7 +410,7 @@
     h += '<div class="section"><span class="label">History · ' + done.length + ' finished</span>';
     if (!done.length) h += '<p class="muted">No finished jobs yet.</p>';
     done.forEach(function (j) {
-      h += '<button class="card" data-a="open" data-ref="' + esc(j.ref) + '"><span class="time">' +
+      h += '<button class="card" data-a="open" data-ref="' + esc(j.id) + '"><span class="time">' +
         esc(dayLabel(j.date, { day: 'numeric', month: 'short', year: 'numeric' })) + ' · ' + esc(timeRange(j)) + '</span>' +
         '<div class="addr" style="font-size:17px">' + esc(j.street) + '</div><div class="meta">EFKT #' + esc(j.ref) + ' · ' + esc(productSummary(j)) + '</div></button>';
     });
@@ -446,10 +447,22 @@
     window.scrollTo(0, 0);
   }
 
+  // The saved job a freshly parsed job should update: same id, or the same EFKT ref
+  // at the same start time, or (if this ref has a single visit in both) that one job.
+  function findSaved(n, pasted) {
+    if (store.jobs[n.id]) return store.jobs[n.id];
+    var same = jobsList().filter(function (j) { return j.ref === n.ref; });
+    var sameTime = same.filter(function (j) { return j.start === n.start; })[0];
+    if (sameTime) return sameTime;
+    var visitsNow = (pasted || []).filter(function (j) { return j.ref === n.ref; }).length;
+    return same.length === 1 && visitsNow <= 1 ? same[0] : null;
+  }
+
   function saveParsed() {
     var jobs = ui.paste.jobs || [];
     jobs.forEach(function (n) {
-      var old = store.jobs[n.ref];
+      var old = findSaved(n, jobs);
+      if (old && old.id !== n.id) delete store.jobs[old.id];
       var j = Object.assign({}, n);
       if (old) {
         // Re-import: update imported details, keep what was done on site.
@@ -464,7 +477,7 @@
         j.details = {}; j.rooms = roomsFor(n.propertyType); j.finishedAt = null;
         j.importedAt = new Date().toISOString();
       }
-      store.jobs[n.ref] = j;
+      store.jobs[n.id] = j;
     });
     save();
     var first = jobs.slice().sort(byTime)[0];
@@ -561,7 +574,7 @@
       case 'room':
         j.rooms[i].done = !j.rooms[i].done; save(); render(); break;
       case 'roomNote': {
-        var key = j.ref + ':' + i;
+        var key = j.id + ':' + i;
         ui.openNotes[key] = !ui.openNotes[key]; render();
         var ta = document.querySelector('textarea[data-f="roomNote"][data-i="' + i + '"]');
         if (ta) ta.focus();

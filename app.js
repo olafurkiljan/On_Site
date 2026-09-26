@@ -3,7 +3,7 @@
   'use strict';
 
   var STORE_KEY = 'onsite.v1';
-  var APP_VERSION = '1.0.0';
+  var APP_VERSION = '1.0.1';
   var DEFAULT_DETAILS = ['Fireplace', 'Kitchen tap', 'Window view', 'Door handle', 'Light fixture', 'Textiles', 'Bathroom tiles'];
   var PRODUCTS = ['Standard foto', 'Dronefoto', 'Kveldsfoto'];
   var PROPERTY_TYPES = ['Leilighet', 'Enebolig', 'Rekkehus', 'Tomannsbolig', 'Hytte', 'Tomt'];
@@ -364,7 +364,7 @@
     var q = encodeURIComponent(fullAddress(j) + ', Norway');
     h += '<div class="section grid2">' +
       '<a class="btn" href="https://safetofly.no" target="_blank" rel="noopener">Drone check</a>' +
-      '<a class="btn" href="https://maps.apple.com/search?query=' + q + '" target="_blank" rel="noopener">Open in Maps</a></div>';
+      '<a class="btn" href="https://www.google.com/maps/search/?api=1&query=' + q + '" target="_blank" rel="noopener">Open in Maps</a></div>';
 
     h += '<div class="bottom-bar"><div class="inner">' +
       (j.finishedAt ? '<button class="btn" data-a="reopen">Reopen job</button>'

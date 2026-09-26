@@ -24,7 +24,7 @@ Input: the pasted text of EFKT's daily email "Morgendagens oppdrag" (Norwegian).
    - Counters for each ordered product, big −/+ buttons (e.g. Standard foto 0/20).
    - Detail photos picker: chips Fireplace, Kitchen tap, Window view, Door handle, Light fixture, Textiles, Bathroom tiles, + Other. States: not picked (grey), picked (outlined), shot (dark with ✓). Counter shot/picked. Remember custom chips for next time.
    - Room checklist from a template per property type (Leilighet, Enebolig, Rekkehus, etc.); tick each room; optional note per room; "+ Add room".
-   - Buttons: "Drone check" (https://safetofly.no) and "Open in Maps" (Apple Maps search for the address — verify the correct Apple Maps URL format).
+   - Buttons: "Drone check" (https://safetofly.no) and "Open in Maps" (Google Maps search for the address: https://www.google.com/maps/search/?api=1&query=<address>).
    - "Finish shoot" at the bottom.
 4. Before you leave: only what's still open (counters below target, unticked rooms, picked-but-unshot details, floor plan not scanned, keys to return, rooms with notes). "Copy summary for agent" (plain text to clipboard), "Go back", "Finish anyway".
 

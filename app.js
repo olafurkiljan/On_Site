@@ -3,7 +3,7 @@
   'use strict';
 
   var STORE_KEY = 'onsite.v1';
-  var APP_VERSION = '1.0.4';
+  var APP_VERSION = '1.0.5';
   var DEFAULT_DETAILS = ['Fireplace', 'Kitchen tap', 'Window view', 'Door handle', 'Light fixture', 'Textiles', 'Bathroom tiles'];
   var PRODUCTS = ['Standard foto', 'Dronefoto', 'Kveldsfoto'];
   var PROPERTY_TYPES = ['Leilighet', 'Enebolig', 'Rekkehus', 'Tomannsbolig', 'Hytte', 'Tomt'];
@@ -414,6 +414,7 @@
         esc(dayLabel(j.date, { day: 'numeric', month: 'short', year: 'numeric' })) + ' · ' + esc(timeRange(j)) + '</span>' +
         '<div class="addr" style="font-size:17px">' + esc(j.street) + '</div><div class="meta">EFKT #' + esc(j.ref) + ' · ' + esc(productSummary(j)) + '</div></button>';
     });
+    if (done.length) h += '<button class="btn danger block" style="margin-top:16px" data-a="clearHistory">Clear history</button>';
     h += '</div><p class="label" style="margin-top:32px">On Site ' + APP_VERSION + ' · data stays on this phone</p>';
     return h;
   }
@@ -589,6 +590,15 @@
         toast('Job finished'); go('today'); break;
       case 'reopen': j.finishedAt = null; save(); render(); break;
       case 'export': exportBackup(); break;
+      case 'clearHistory': {
+        var finished = jobsList().filter(function (x) { return x.finishedAt; });
+        if (!finished.length) break;
+        if (!window.confirm('Delete ' + plural(finished.length, 'finished job', 'finished jobs') +
+          ' from this phone? This can\'t be undone. Upcoming and unfinished jobs are kept.\n\nTip: Export backup first if you might need them.')) break;
+        finished.forEach(function (x) { delete store.jobs[x.id]; });
+        save(); toast('History cleared'); render();
+        break;
+      }
     }
   });
 

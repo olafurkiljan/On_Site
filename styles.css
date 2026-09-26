@@ -73,6 +73,8 @@ a { color: var(--accent); }
 .btn.small { min-height: var(--tap); padding: 8px 12px; font-size: 14px; }
 .btn.block { width: 100%; }
 .btn.link { border-color: transparent; color: var(--accent); padding-left: 0; padding-right: 0; }
+.btn.danger { border-color: var(--check); color: var(--check); }
+.btn.danger:active { background: rgba(179, 38, 30, 0.08); }
 .btn[disabled] { opacity: 0.4; }
 
 /* Top bar */

@@ -31,7 +31,7 @@ Input: the pasted text of EFKT's daily email "Morgendagens oppdrag" (Norwegian).
 ## Settings screen
 - "Show Open weScan button" toggle, off by default. When on, the PLANTEGNING 2D tile shows "Open weScan" linking to: shortcuts://run-shortcut?name=Open%20weScan
 - "Export backup" (downloads JSON) and "Import backup".
-- History of finished jobs.
+- History of finished jobs, with "Clear history" (asks first; deletes finished jobs only).
 
 ## Sun (sun.js)
 - Golden hour start, sunset, blue hour for Oslo, Norway, calculated offline (no API). A small MIT-licensed sun library copied into the repo, or your own formula; credit it in README.

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>On Site — parser tests</title>
+  <style>
+    body { font: 15px/1.4 -apple-system, Arial, sans-serif; background: #F2F2EE; color: #16202B; margin: 0; padding: 16px; }
+    h1 { font-size: 22px; }
+    li { padding: 6px 0; border-bottom: 1px solid #C9CBC4; list-style: none; }
+    ul { padding: 0; }
+    .ok::before { content: 'PASS  '; color: #1F4E79; font-weight: 700; }
+    .bad::before { content: 'FAIL  '; color: #B3261E; font-weight: 700; }
+    textarea { width: 100%; min-height: 120px; font: inherit; }
+    button { min-height: 44px; padding: 0 16px; font: inherit; }
+    pre { white-space: pre-wrap; font-size: 12px; background: #fff; padding: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Parser tests</h1>
+  <p id="summary">Loading tests/sample-email.txt…</p>
+  <ul id="list"></ul>
+  <details><summary>Parsed output</summary><pre id="out"></pre></details>
+  <p>Or test other text (it is never sent anywhere):</p>
+  <textarea id="box"></textarea>
+  <button id="run">Run on this text</button>
+  <script src="../parser.js"></script>
+  <script src="parser-checks.js"></script>
+  <script>
+    function show(text) {
+      var r = runParserChecks(OnSiteParser, text);
+      var passed = r.results.filter(function (x) { return x.ok; }).length;
+      document.getElementById('summary').textContent = passed + ' of ' + r.results.length + ' checks passed';
+      document.getElementById('list').innerHTML = r.results.map(function (x) {
+        var li = document.createElement('li');
+        li.className = x.ok ? 'ok' : 'bad';
+        li.textContent = x.name + (x.detail ? ' (' + x.detail + ')' : '');
+        return li.outerHTML;
+      }).join('');
+      document.getElementById('out').textContent = JSON.stringify(r.parsed, null, 2);
+    }
+    fetch('sample-email.txt').then(function (r) { return r.text(); }).then(show).catch(function () {
+      document.getElementById('summary').textContent = 'Could not load the sample file. Paste it in the box below.';
+    });
+    document.getElementById('run').onclick = function () { show(document.getElementById('box').value); };
+  </script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+From: EFKT kundeservice
+Subject: Morgendagens oppdrag
+To: fotograf@example.com
+
+Se oppdragene i EFKT web
+
+EFKT #600001: Eksempelveien 12 (Bolig)
+Bestilte produkter
+Oppmøte, 20 standard foto, Plantegning 2d
+Tid
+Onsdag 16. september 2026, 09:00 → 10:30
+Instruksjoner til fotograf
+Instruksjoner for nøkkelhenting
+Nøkler hentes på meglerkontoret.
+Eiendomsinformasjon
+Boligtype: Leilighet
+Areal: 50 - 100 m²
+Antall etasjer: 1
+Etasje: 3
+Selger
+Ola Testmann
+Eksempelveien 12
+0000 TESTBY
+Telefon
+00000000
+Mobiltelefon
+E-post
+ola@example.com
+Meglerkontor
+Test Eiendom
+Prøvegata 1
+0000 Testby
+Megler
+Kari Prøve
+Telefon
+00000001
+E-post
+kari@example.com
+Adresse
+Eksempelveien 12
+0000 TESTBY
+Kart
+Vis i Google maps
+
+EFKT #600002: Testgata 4 (Bolig)
+Bestilte produkter
+Oppmøte, 25 standard foto, 5 dronefoto
+Tid
+Onsdag 16. september 2026, 13:00 → 14:30
+Instruksjoner til fotograf
+Selger ønsker bilder av hagen i tillegg.
+Instruksjoner for nøkkelhenting
+Eiendomsinformasjon
+Boligtype: Enebolig
+Areal: Missing
+Antall etasjer: 2
+Boligens verdi: Missing
+Selger
+Per Eksempel
+Telefon
+00000002
+E-post
+per@example.com
+Adresse
+Testgata 4
+0000 TESTBY
+Kart
+Vis i Google maps
+
+EFKT #600003: Prøvealléen 8 (Bolig)
+Bestilte produkter
+Oppmøte, 20 standard foto
+Tid
+Onsdag 16. september 2026, 16:30 → 18:00
+Instruksjoner til fotograf
+Instruksjoner for nøkkelhenting
+Eiendomsinformasjon
+Boligtype: Leilighet
+Areal: 50 - 100 m²
+Antall etasjer: Missing
+Adresse
+Prøvealléen 8
+0000 TESTBY
+Kart
+Vis i Google maps
+
+EFKT #600004: Prøvealléen 8 (Bolig)
+Bestilte produkter
+Oppmøte, 7 kveldsfoto
+Tid
+Onsdag 16. september 2026, 20:00 → 20:45
+Instruksjoner til fotograf
+Instruksjoner for nøkkelhenting
+Eiendomsinformasjon
+Boligtype: Leilighet
+Areal: 50 - 100 m²
+Adresse
+Prøvealléen 8
+0000 TESTBY
+Kart
+Vis i Google maps
+
+Se oppdragene i EFKT web
+
+Med vennlig hilsen
+EFKT NORGE AS
